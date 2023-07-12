@@ -455,11 +455,12 @@ def apply_scbc(ds, mizuroute_exe, bmorph_config, client=None, save_mults=False, 
         local_ds['time'] = flows[0].index
         local_ds.name = out_varname
         local_ds = local_ds.where(local_ds >= 1e-4, other=1e-4)
+        encoding = {out_varname: {'_FillValue': -9999.0}}
         try:
             os.remove(file_path)
         except OSError:
             pass
-        local_ds.transpose().to_netcdf(file_path)
+        local_ds.transpose().to_netcdf(file_path, encoding=encoding)
 
         if mult_path:
             try:
@@ -470,7 +471,7 @@ def apply_scbc(ds, mizuroute_exe, bmorph_config, client=None, save_mults=False, 
             mult_ds['seg'] = segs
             mult_ds['time'] = flows[0].index
             mult_ds.name = 'mults'
-            mult_ds.transpose().to_netcdf(mult_path)
+            mult_ds.transpose().to_netcdf(mult_path, encoding=encoding)
 
     if 'condition_var' in bmorph_config.keys() and bmorph_config['condition_var']:
         scbc_type = 'conditional'
@@ -538,7 +539,7 @@ def apply_scbc(ds, mizuroute_exe, bmorph_config, client=None, save_mults=False, 
             )
 
     mizutil.run_mizuroute(mizuroute_exe, config_path)
-    region_totals = xr.open_mfdataset(f'{mizuroute_config["output_dir"]}{mizuroute_config["out_name"]}*')
+    region_totals = xr.open_mfdataset(f'{mizuroute_config["output_dir"]}{mizuroute_config["out_name"]}.h*')
     region_totals = region_totals.sel(time=slice(*bmorph_config['apply_window']))
     region_totals['seg'] = region_totals['reachID'].isel(time=0)
     return region_totals.load()
