@@ -903,9 +903,13 @@ def map_met_hru_to_seg(met_hru, topo):
     met_vars = set(met_hru.variables.keys()) - set(met_hru.coords)
     # Prep met data structures
     met_seg = xr.Dataset({'time': met_hru['time']})
-    for v  in met_vars:
-        met_seg[v] = xr.DataArray(data=np.nan, dims=('time', 'seg', ),
-                            coords={'time': met_hru['time'], 'seg': topo['seg']})
+    if len(met_vars):
+        for v  in met_vars:
+            met_seg[v] = xr.DataArray(data=np.nan, dims=('time', 'seg', ),
+                                coords={'time': met_hru['time'], 'seg': topo['seg']})
+    else:
+        met_seg['dummy'] = xr.DataArray(data=np.nan, dims=('time', 'seg', ),
+                                  coords={'time': met_hru['time'], 'seg': topo['seg']})
 
     # Map from hru -> segment for met data
     # In case a segment is not assigned an hru,
