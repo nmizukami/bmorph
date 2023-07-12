@@ -12,6 +12,8 @@ CONTROL_TEMPLATE = Template(
 <output_dir>           $output_dir !
 <sim_start>            $sim_start !
 <sim_end>              $sim_end !
+<restart_write>        last !
+<fname_state_in>       $restart  !
 <fname_ntopOld>        $topo_file !
 <dname_nhru>           seg !
 <dname_sseg>           seg !
@@ -29,13 +31,13 @@ CONTROL_TEMPLATE = Template(
 <case_name>             $out_name !
 <param_nml>             param.nml.default !
 <doesBasinRoute>        0 !
-<varname_area>          Contrib_Area !
-<varname_length>        Length !
+<varname_area>          Basin_Area !
+<varname_length>        length !
 <varname_slope>         Slope !
-<varname_HRUid>         seg_id !
+<varname_HRUid>         hruid !
 <varname_segId>         seg_id !
 <varname_downSegId>     Tosegment !
-<varname_hruSegId>      seg_id !
+<varname_hruSegId>      hru_seg_id !
 """)
 
 
@@ -44,6 +46,7 @@ def write_mizuroute_config(region, scbc_type, time_window,
                            topo_dir='../topologies/',
                            input_dir='../input/',
                            output_dir='../output/',
+                           restart='coldstart',
                            out_name=None):
     # meaning an out_name was not specified and we should
     # specify it here
@@ -56,8 +59,9 @@ def write_mizuroute_config(region, scbc_type, time_window,
         'output_dir': os.path.abspath(output_dir)+'/',
         'sim_start': time_window[0].strftime("%Y-%m-%d"),
         'sim_end': time_window[1].strftime("%Y-%m-%d"),
-        'topo_file': f'{region}_huc12_topology_scaled_area.nc',
+        'topo_file': f'{region}_topology.nc',
         'flow_file': f'{region}_local_{scbc_type}_scbc.nc',
+        'restart': restart,
         'out_name': out_name
     }
 
@@ -910,9 +914,9 @@ def map_met_hru_to_seg(met_hru, topo):
     for seg in met_seg['seg'].values:
         subset = np.argwhere(hru_2_seg == seg).flatten()
         if not len(subset):
-            segs_without_hrus.append(seg)   
+            segs_without_hrus.append(seg)
             for var in met_vars:
-                met_seg[var].loc[{'seg': seg}] = np.nan*met_hru[var].isel(hru=0)            
+                met_seg[var].loc[{'seg': seg}] = np.nan*met_hru[var].isel(hru=0)
         else:
             for var in met_vars:
                 met_seg[var].loc[{'seg': seg}] = met_hru[var].isel(hru=subset).mean(dim='hru')
@@ -995,7 +999,7 @@ def to_bmorph(topo: xr.Dataset, routed: xr.Dataset, reference: xr.Dataset,
 
     # Remap any meteorological data from hru to stream segment
     met_seg = map_met_hru_to_seg(met_hru, topo)
-    # flag whether each seg has an 
+    # flag whether each seg has an
     # hru or not as a requirement for bias correction
     hru_2_seg = topo['seg_hru_id'].values
     met_seg['has_hru'] = np.nan*met_seg['seg']

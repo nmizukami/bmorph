@@ -151,7 +151,7 @@ def apply_blendmorph(raw_upstream_ts, raw_downstream_ts,
                      train_upstream_y=None, train_downstream_y=None,
                      ref_upstream_y=None, ref_downstream_y=None,
                      n_smooth_long=None, n_smooth_short=5,
-                     bw=3, xbins=200, ybins=10, rtol=1e-6, atol=1e-8, 
+                     bw=3, xbins=200, ybins=10, rtol=1e-6, atol=1e-8,
                      method='hist', train_cdf_min=1e-6, **kwargs):
     """Bias correction performed by blending bmorphed flows on user defined intervals.
 
@@ -399,7 +399,7 @@ def _scbc_pass(ds, apply_window, **kwargs):
     from segements without hrus into a format compatible with flows
     that are bias corrected. This is to ensure all the data is still
     returned to the user, but that the flows that are not bias
-    corrected stay the same.    
+    corrected stay the same.
     """
     raw_ts =    ds['IRFroutedRunoff'].to_series()
     local_flow =   ds['dlayRunoff']
@@ -519,7 +519,7 @@ def apply_scbc(ds, mizuroute_exe, bmorph_config, client=None, save_mults=False, 
 
     out_file = (f'{bmorph_config["data_path"]}/input/'
                 f'{bmorph_config["output_prefix"]}_local_{scbc_type}_scbc.nc')
-    if save_mults: 
+    if save_mults:
         mult_file = (f'{bmorph_config["data_path"]}/input/'
                 f'{bmorph_config["output_prefix"]}_local_mult_{scbc_type}_scbc.nc')
     else:
@@ -533,6 +533,7 @@ def apply_scbc(ds, mizuroute_exe, bmorph_config, client=None, save_mults=False, 
             topo_dir=bmorph_config.get('topologies_path', bmorph_config['data_path'] + '/topologies/'),
             input_dir=bmorph_config.get('input_path', bmorph_config['data_path'] + '/input/'),
             output_dir=bmorph_config.get('output_path', bmorph_config['data_path'] + '/output/'),
+            restart=bmorph_config.get('restart', bmorph_config['restart']),
             out_name=bmorph_config.get('out_name', None)
             )
 
