@@ -870,9 +870,9 @@ def map_var_to_segs(routed: xr.Dataset, map_var: xr.DataArray, var_label: str,
         if has_hru.sel(seg=seg):
             up_seg = routed['up_ref_seg'].sel(seg=seg)
             down_seg = routed['down_ref_seg'].sel(seg=seg)
-            if up_seg != -1:
+            if up_seg != -1 and not np.isnan(up_seg):
                 routed[up_var].loc[{'seg': seg}] = map_var.sel(seg=up_seg).values[:]
-            if down_seg != -1:
+            if down_seg != -1 and not np.isnan(down_seg):
                 routed[down_var].loc[{'seg': seg}] = map_var.sel(seg=down_seg).values[:]
 
     return routed

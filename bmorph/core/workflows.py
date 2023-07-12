@@ -497,7 +497,7 @@ def apply_scbc(ds, mizuroute_exe, bmorph_config, client=None, save_mults=False, 
     # select out segs that have an hru
     # and prep the pass function if there are
     # segs without an hru
-    bc_segs_idx = np.where(ds['has_hru'])[0]
+    bc_segs_idx = np.where((~np.isnan(ds['has_hru'])) & (~np.isnan(ds['up_ref_seg'])) & (~np.isnan(ds['down_ref_seg'])))[0]
     if len(bc_segs_idx) != len(ds['seg'].values):
         scbc_pass_fun = partial(_scbc_pass, **bmorph_config)
 
